@@ -1,0 +1,21 @@
+[project]
+name = "data-challenge-insea-2026"
+version = "0.1.0"
+description = "Starter kit for the INSEA 2026 data challenge: will this car sell within 30 days?"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "scikit-learn",
+    "xgboost",
+    "lightgbm",
+    "matplotlib",
+    "pillow",
+    "tqdm",
+    "kaggle",
+    "jupyterlab",
+]
+
+[tool.setuptools]
+packages = ["kit"]

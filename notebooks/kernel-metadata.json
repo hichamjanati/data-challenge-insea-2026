@@ -1,0 +1,17 @@
+{
+  "id": "hichamjanati/insea-2026-data-challenge-starter",
+  "title": "INSEA 2026 data challenge: starter",
+  "code_file": "kaggle_starter.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": [
+    "multimodal-predictive-ml-data-challenge"
+  ],
+  "kernel_sources": [],
+  "model_sources": []
+}
