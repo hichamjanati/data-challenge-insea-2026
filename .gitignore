@@ -1,6 +1,7 @@
 # data and credentials: never in git
 data/
 kaggle.json
+.kaggle/
 submissions/*.csv
 
 # environments and caches

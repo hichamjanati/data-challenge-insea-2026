@@ -1,4 +1,5 @@
-"""Baseline: a logistic regression on the table columns, trained on the complete rows only.
+"""Baseline: a linear discriminant analysis (LDA) with default settings on the table columns,
+trained on the complete rows only.
 
 Usage: uv run python -m kit.train
 Writes submissions/baseline.csv. Reported score: 5-fold cross-validated log loss on the training rows used.
@@ -10,15 +11,15 @@ This is a starting point, not a recommendation. Two of its choices are worth que
 from datetime import date
 import numpy as np, pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder
 from kit.data import SUBMISSIONS, TARGET, load_train, load_test
 
 NUMERIC = ["reg_year", "km", "engine_l", "price_mad", "seats", "doors", "post_month"]
 CATEGORICAL = ["make", "model", "gearbox", "fuel", "body_type", "color", "city", "seller_type"]
-# not used here: quartier, seller_id, the opt_* flags, title, description, the photos, buyer_rating. Your call.
+# we use only some of the features to speed up the training
 
 train, test = load_train(), load_test()
 base_rate = train[TARGET].mean()
@@ -27,12 +28,11 @@ complete = train[cols].notna().all(axis=1)
 print(f"train: {len(train):,} ads, {complete.sum():,} complete on the {len(cols)} columns used ({complete.mean():.1%})")
 X, y = train.loc[complete, cols], train.loc[complete, TARGET]
 
+# numeric columns as they are, categorical columns one-hot encoded, then LDA: no scaling, no tuning
 model = Pipeline([
-    ("prep", ColumnTransformer([
-        ("num", StandardScaler(), NUMERIC),
-        ("cat", OneHotEncoder(handle_unknown="ignore", min_frequency=10), CATEGORICAL),
-    ])),
-    ("clf", LogisticRegression(C=1.0, max_iter=2000)),
+    ("prep", ColumnTransformer([("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), CATEGORICAL)],
+                               remainder="passthrough")),
+    ("clf", LinearDiscriminantAnalysis()),
 ])
 cv = -cross_val_score(model, X, y, cv=5, scoring="neg_log_loss")
 print(f"5-fold log loss on the complete training rows: {cv.mean():.4f} (+/- {cv.std():.4f})")
