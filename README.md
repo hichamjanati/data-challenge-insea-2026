@@ -81,8 +81,7 @@ rebuild your environment with `uv sync`. Run anything with `uv run python ...` o
 
 ## 3. Kaggle access
 
-Each team member needs a Kaggle account that has **joined the competition** (open the competition link and accept the rules).
-Then log the command line in, once:
+Each team member needs a Kaggle account. Log the command line in, once:
 
 ```sh
 uv run kaggle auth login            # opens a browser, recommended
@@ -90,31 +89,67 @@ uv run kaggle auth login            # opens a browser, recommended
 
 And login on the browser. Your credential token will automatically be saved in your home folder ~/.kaggle: keep it private from both humans (and agents !). 
 
-## 4. The four commands
+## 4. Join the competition
+
+1. Open the **competition invitation link** shared by the host, while logged in to your Kaggle account.
+2. Click **Join Competition** and **accept the rules**. Without this, every download and submission is refused.
+3. Form your team on Kaggle: one member opens the **Team** tab of the competition and invites the others.
+
+The rules on the competition page are the ones that apply.
+
+## 5. From data to submission
+
+Run `just` alone to list the commands. Each one is a single line in `justfile`.
+
+### Step 1: get the data
 
 ```sh
-just data                                   # downloads and unpacks everything into data/ (about 400 MB, gitignored)
-just train                                  # trains the baseline, writes submissions/baseline.csv
-just check submissions/baseline.csv         # validates a submission file
-just submit submissions/baseline.csv "baseline: LDA on the table"   # checks, asks, uploads
+just data
 ```
 
-Run `just` alone to list the commands. Each one is a single line in `justfile`; without just, run it directly:
+Downloads and unpacks the tables and the photos into `data/` (about 400 MB, gitignored). Run it once.
 
+### Step 2: train a model, in the notebook or with the scripts
 
-| just                         | without just                                 |
-| ---------------------------- | -------------------------------------------- |
-| `just setup`                 | `uv sync`                                    |
-| `just data`                  | `uv run python -m kit.download_data`         |
-| `just train`                 | `uv run python -m kit.train`                 |
-| `just check FILE`            | `uv run python -m kit.check_submission FILE` |
-| `just submit FILE "MESSAGE"` | `uv run python -m kit.submit FILE "MESSAGE"` |
+**In the notebook.** Start Jupyter and open `notebooks/kaggle_starter.ipynb`:
 
+```sh
+uv run jupyter lab
+```
 
-You have **one submission per day per team**: `just submit` asks for confirmation. Submission files are gitignored;
-keep the code that produced them instead. On Windows, keep `$` out of the submission message: PowerShell would replace it.
+Run all the cells: the notebook trains the baseline and writes `submissions/submission.csv`.
 
-## 5. What is in the kit
+**With the scripts.** Run the baseline:
+
+```sh
+just train
+```
+
+This runs `kit/train.py`: it trains the baseline, prints its cross-validated log loss and writes the predictions for the
+test ads to `submissions/baseline.csv`. Edit `kit/train.py` (or write your own script) to improve it.
+
+### Step 3: check the submission file
+
+```sh
+just check submissions/baseline.csv
+```
+
+Validates the file the way Kaggle does, and warns about predictions that will cost you. Use the path of your own file,
+for example `submissions/submission.csv` if it comes from the notebook.
+
+### Step 4: submit
+
+```sh
+just submit submissions/baseline.csv "baseline: LDA on the table"
+```
+
+Checks the file again, asks for confirmation, then uploads it with your message. **Careful: you have one submission
+per day per team**, so make sure the file is the one you want before typing `y`. On Windows, keep `$` out of the message:
+PowerShell would replace it.
+
+Submission files are gitignored: keep the code that produced them instead.
+
+## 6. What is in the kit
 
 
 | file                             | role                                                                                    |
@@ -127,15 +162,6 @@ keep the code that produced them instead. On Windows, keep `$` out of the submis
 | `notebooks/kaggle_starter.ipynb` | the same baseline as a notebook, runs unchanged on your laptop or on Kaggle (section 7) |
 | `REPORT.md`                      | the report skeleton to fill in for the oral evaluation                                  |
 
-
-The baseline ignores the text, the photos and part of the table, drops every training ad with a missing value, and gives
-the train sale rate to every test ad with a missing value. Each of these choices is a place to start.
-
-## 6. Rules in short
-
-Teams of 2 or 3, one Kaggle team per student team, one submission per day, one final submission selected before the
-deadline. Public pretrained models are allowed; external data is not. Your code must reproduce your final submission.
-The full rules are on the competition page and are the ones that apply.
 
 ## 7. Working on Kaggle with a GPU
 
